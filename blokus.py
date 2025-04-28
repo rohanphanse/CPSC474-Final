@@ -192,7 +192,7 @@ class BlokusState:
         if self.is_terminal():
             p1_score = self.get_score(0)
             p2_score = self.get_score(1)
-            return (p2_score - p1_score) / (p1_score + p2_score + 1)
+            return round((p2_score - p1_score) / (p1_score + p2_score + 1e-6), 5)
         return None
     
     def copy(self):

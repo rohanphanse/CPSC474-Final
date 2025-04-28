@@ -5,6 +5,7 @@ import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from blokus import *
+from greedy import *
 
 class MCTSNode():
     __slots__ = ("state", "parent", "action", "num_visits", "value", "children")
@@ -20,7 +21,8 @@ class MCTSNode():
 def build_mcts_tree(state, cpu_time_limit):
     start_time = time.perf_counter()
     root = MCTSNode(state)
-    exploration_constant = 1.5
+    exploration_constant = 1.4
+    greedy_player = greedy_policy()
     while True:
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time >= cpu_time_limit - 0.0001:
@@ -67,8 +69,7 @@ def build_mcts_tree(state, cpu_time_limit):
         # Simulation
         cur_state = cur_node.state
         while not cur_state.is_terminal():
-            actions = cur_state.get_actions()
-            action = "Pass" if actions == "Pass" else random.choice(actions)
+            action, _ = greedy_player(cur_state)
             cur_state = cur_state.successor(action)
         payoff =  cur_state.payoff()
         # Backpropogation
@@ -81,9 +82,6 @@ def build_mcts_tree(state, cpu_time_limit):
 def mcts_policy(cpu_time_limit):
     def policy(state):
         num_workers = multiprocessing.cpu_count()
-        manager = multiprocessing.Manager()
-        stop_event = manager.Event()
-        start_time = time.perf_counter()
         results = []
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             futures = [
@@ -94,18 +92,13 @@ def mcts_policy(cpu_time_limit):
                 )
                 for _ in range(num_workers)
             ]
-            while True:
-                elapsed = time.perf_counter() - start_time
-                if elapsed >= cpu_time_limit:
-                    stop_event.set()
-                    break
-                time.sleep(0.01)
-            
             for future in as_completed(futures):
                 results.append(future.result())
         merged_children = {}
+        total_visits = 0
         for tree in results:
             for child in tree.children:
+                total_visits += child.num_visits
                 if child.action in merged_children:
                     merged_children[child.action]["visits"] += child.num_visits
                     merged_children[child.action]["value"] += child.value
@@ -114,58 +107,17 @@ def mcts_policy(cpu_time_limit):
                         "visits": child.num_visits,
                         "value": child.value
                     }
-        top_actions = sorted(merged_children.items(), key=lambda x: x[1]["visits"], reverse=True)[:5]
-        best = None
-        best_action = None
-        for action in merged_children:
-            child = merged_children[action]
-            if best is None or child["visits"] > best["visits"]:
-                best = child
-                best_action = action
-        return best_action, top_actions
+        top_actions = sorted(merged_children.items(), key=lambda x: x[1]["value"] / (x[1]["visits"] + 1e-6), reverse=True)[:5]
+        best_action = top_actions[0][0]
+        return best_action, top_actions, total_visits
     return policy
 
-def greedy_policy():
-    def policy(state):
-        actions = state.get_actions()
-        if actions == "Pass":
-            return "Pass", [(0, "Pass")]
-        action_pairs = []
-        cur_actions = state.successor("Pass").get_actions()
-        for action in actions:
-            new_state = state.successor(action)
-            score = calculate_move_score(state, cur_actions, new_state.get_actions(), action)
-            action_pairs.append((score, action))
-        max_score = max(score for score, _ in action_pairs)
-        best_pairs = [x for x in action_pairs if x[0] == max_score]
-        top_actions = []
-        if len(best_pairs) >= 5:
-            top_actions = random.sample(best_pairs, k = 5)
-        else:
-            top_actions = sorted(action_pairs, reverse = True)[:5]
-        best_action = top_actions[0][1]
-        return best_action, top_actions
-    return policy
-
-def calculate_move_score(cur_state, cur_actions, new_actions, action):
-    piece_name, x, y, _, _ = action
-    score = 0
-    piece_size = len(pieces[piece_name])
-    score += piece_size * 2
-    if (x == 0 or x == N - 1) and (y == 0 or y == N - 1):
-        score += 10
-    if len(cur_actions) < len(new_actions):
-        score += 15
-    if num_pieces - len(cur_state.hands[cur_state.P]) < 5:
-        center_dist = (abs(x - N // 2) + abs(y - N // 2))
-        score += (N // 2 - center_dist) * 0.5
-    return score
 
 if __name__ == "__main__":
     print("\033[2J\033[H", end="")
     print("# CPU cores:", multiprocessing.cpu_count())
     state = BlokusState() # Initial state
-    mcts_player = mcts_policy(cpu_time_limit=1.0)
+    mcts_player = mcts_policy(cpu_time_limit=2.0)
     greedy_player = greedy_policy()
     player_2 = "greedy"
     turn = 1
@@ -173,11 +125,12 @@ if __name__ == "__main__":
         action = None
         top_actions = None
         greedy = True
+        total_visits = None
         if state.P == 0:
-            if turn < 10:
+            if turn < 0:
                 action, top_actions = greedy_player(state)
             else:
-                action, top_actions = mcts_player(state)
+                action, top_actions, total_visits = mcts_player(state)
                 greedy = False
         elif player_2 == "greedy":
             action, top_actions = greedy_player(state)
@@ -187,15 +140,16 @@ if __name__ == "__main__":
         player = state.P
         state = state.successor(action)
         print("\033[2J\033[H", end="")
-        print("Player #1 (Greedy Start + MCTS) vs. Player #2 (Greedy)")
+        print("Player #1 (MCTS) vs. Player #2 (Greedy)")
         state.display_board(action, player)
-        print(f"Turn {turn} - Player #{2 - state.P} chose: {action}")
+        print(f"On turn {turn}, Player #{2 - state.P} chose: {action}")
         if top_actions:
-            print("Top actions:")
             if not greedy:
+                print(f"Top actions (total visits: {total_visits}):")
                 for i, top_action in enumerate(top_actions):
-                    print(f"  {i + 1}.", top_action[0], " - visits:", top_action[1]["visits"])
+                    print(f"  {i + 1}.", top_action[0], " - avg. reward:", round(top_action[1]["value"] / (top_action[1]["visits"] + 1e-6), 5), "and visits:", top_action[1]["visits"])
             else:
+                print("Top actions:")
                 for i, top_action in enumerate(top_actions):
                     print(f"  {i + 1}.", top_action[1], "- score:", top_action[0])
         turn += 1
