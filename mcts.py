@@ -19,9 +19,9 @@ def mcts_policy(cpu_time_limit):
     def policy(state):
         start_time = time.perf_counter()
         root = MCTSNode(state)
+        exploration_constant = 2
         while True:
             elapsed_time = time.perf_counter() - start_time
-            print(elapsed_time)
             if elapsed_time >= cpu_time_limit - 0.0001:
                 break
             cur_node = root
@@ -35,7 +35,7 @@ def mcts_policy(cpu_time_limit):
                             best_child = child
                             break
                         else:
-                            ucb_score = child.value / child.num_visits + math.sqrt(2 * math.log(cur_node.num_visits) / child.num_visits)
+                            ucb_score = child.value / child.num_visits + exploration_constant * math.sqrt(math.log(cur_node.num_visits) / child.num_visits)
                             if best_child is None or ucb_score > best_ucb_score:
                                 best_child = child
                                 best_ucb_score = ucb_score
@@ -45,10 +45,11 @@ def mcts_policy(cpu_time_limit):
                             best_child = child
                             break
                         else:
-                            ucb_score = child.value / child.num_visits - math.sqrt(2 * math.log(cur_node.num_visits) / child.num_visits)
+                            ucb_score = child.value / child.num_visits - exploration_constant * math.sqrt(math.log(cur_node.num_visits) / child.num_visits)
                             if best_child is None or ucb_score < best_ucb_score:
                                 best_child = child
                                 best_ucb_score = ucb_score
+                cur_node = best_child
             # Expansion
             if not cur_node.state.is_terminal() and len(cur_node.children) == 0:
                 # Create children all at once
@@ -65,7 +66,11 @@ def mcts_policy(cpu_time_limit):
             cur_state = cur_node.state
             while not cur_state.is_terminal():
                 actions = cur_state.get_actions()
-                action = "Pass" if actions == "Pass" else random.choice(actions)
+                if actions == "Pass":
+                    action = "Pass"
+                else:
+                    sorted_actions = sorted(actions, key=lambda a: len(pieces[a[0]]) if a != "Pass" else 0, reverse=True)
+                    action = sorted_actions[0] if random.random() < 0.7 else random.choice(actions)
                 cur_state = cur_state.successor(action)
             payoff = cur_state.payoff()
             # Backpropogation
@@ -84,7 +89,7 @@ def mcts_policy(cpu_time_limit):
 
 if __name__ == "__main__":
     state = BlokusState() # Initial state
-    mcts_player = mcts_policy(cpu_time_limit=1.0)
+    mcts_player = mcts_policy(cpu_time_limit=2.0)
     # MCTS agent vs. random agent
     while not state.is_terminal():
         action = None
@@ -93,9 +98,9 @@ if __name__ == "__main__":
         else:
             actions = state.get_actions()
             action = actions if actions == "Pass" else random.choice(actions)
-        print("action:", action)
+            time.sleep(1)
         state = state.successor(action)
-        #print("\033[2J\033[H", end="")
+        print("\033[2J\033[H", end="")
         state.display_board()
         print(f"Player #{2 - state.P} chose: {action}")
     # print("Player #1 moves:", moves[0])

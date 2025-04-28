@@ -174,12 +174,7 @@ class BlokusState:
         if self.is_terminal():
             p1_score = self.get_score(0)
             p2_score = self.get_score(1)
-            if p1_score > p2_score:
-                return 1
-            elif p1_score < p2_score:
-                return -1
-            else:
-                return 0
+            return (p2_score - p1_score) / (p1_score + p2_score + 1)
         return None
     
 if __name__ == "__main__":
