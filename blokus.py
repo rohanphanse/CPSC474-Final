@@ -56,6 +56,7 @@ num_pieces = len(pieces)
 orientations = {piece_name: get_orientations(piece) for piece_name, piece in pieces.items()}
 N = 14 # Board size
 players = ["\033[34m□\033[0m", "\033[31m□\033[0m"]
+players_filled = ["\033[34m■\033[0m", "\033[31m■\033[0m"]
 moves = [[], []]
 
 # State
@@ -66,21 +67,42 @@ class BlokusState:
         self.P = P # Current player
         self.passing = passing if passing else [False, False]
     
-    def display_board(self):
-        for row in self.board:
-            print(" ".join(row))
+    def display_board(self, action = None, player = 0):
+        if action and action != "Pass":
+            piece = self.get_piece(action[0], action[3], action[4])
+            for r in range(N):
+                for x in range(N):
+                    y = N - 1 - r
+                    found = False
+                    for dx, dy in piece:
+                        new_x = action[1] + dx
+                        new_y = action[2] + dy
+                        if new_x == x and new_y == y:
+                            found = True
+                            break
+                    if found:
+                        print(players_filled[player], end = " ")
+                    else:
+                        print(self.board[r][x], end = " ")
+                print()  
+        else:
+            for row in self.board:
+                print(" ".join(row))
 
-    def place_piece(self, piece_name, x, y, rot = 0, refl = False):
+    def get_piece(self, piece_name, rot = 0, refl = False):
         piece = pieces[piece_name]
         for _ in range(rot // 90):
             piece = rotate_piece(piece)
         if refl:
             piece = reflect_piece(piece)
+        return piece
+
+    def place_piece(self, piece_name, x, y, rot = 0, refl = False):
+        piece = self.get_piece(piece_name, rot, refl)
         y = N - 1 - y
         for dx, dy in piece:
             self.board[y - dy][x + dx] = players[self.P]
         self.hands[self.P].remove(piece_name)
-        moves[self.P].append((piece_name, x, y, rot, refl))
 
     def next_turn(self):
         self.P = 1 - self.P
@@ -154,11 +176,7 @@ class BlokusState:
         return self.P
 
     def successor(self, action):
-        new_board = [row.copy() for row in self.board]
-        new_hands = [hand.copy() for hand in self.hands]
-        new_passing = self.passing.copy()
-        moves[self.P].append(action)
-        new_state = BlokusState(new_board, new_hands, self.P, new_passing)
+        new_state = self.copy()
         if action == "Pass":
             turn = self.P
             new_state.next_turn()
@@ -177,12 +195,19 @@ class BlokusState:
             return (p2_score - p1_score) / (p1_score + p2_score + 1)
         return None
     
+    def copy(self):
+        new_board = [row.copy() for row in self.board]
+        new_hands = [hand.copy() for hand in self.hands]
+        new_passing = self.passing.copy()
+        return BlokusState(new_board, new_hands, self.P, new_passing)
+    
 if __name__ == "__main__":
     state = BlokusState() # Initial state
     # Random agent vs. random agent
     while not state.is_terminal():
         actions = state.get_actions()
         random_action = actions if actions == "Pass" else random.choice(actions)
+        moves[state.P].append(random_action)
         state = state.successor(random_action)
         print("\033[2J\033[H", end="")
         state.display_board()
