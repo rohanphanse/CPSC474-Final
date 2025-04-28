@@ -31,7 +31,11 @@ class Blokus:
             "square-1": [(0, 0)],                              
         }
         self.hands = [list(self.pieces.keys()), list(self.pieces.keys())]
-        self.placements = [[], []]
+        self.moves = [[], []]
+        self.passing = [False, False]
+        self.orientations = {}
+        for piece_name, piece in self.pieces.items():
+            self.orientations[piece_name] = self.get_orientations(piece)
     
     def display_board(self):
         for row in self.board:
@@ -47,7 +51,7 @@ class Blokus:
         for dx, dy in piece:
             self.board[y - dy][x + dx] = self.players[self.P]
         self.hands[self.P].remove(piece_name)
-        self.placements[self.P].append((piece_name, x, y, rot, refl))
+        self.moves[self.P].append((piece_name, x, y, rot, refl))
 
     def switch_turn(self):
         self.P = 1 - self.P
@@ -66,7 +70,7 @@ class Blokus:
             if self.board[new_y][new_x] != ".":
                 return False
         # First move
-        if len(self.placements[self.P]) == 0:
+        if len(self.moves[self.P]) == 0:
             for dx, dy in piece:
                 new_x = x + dx
                 new_y = y - dy
@@ -97,14 +101,20 @@ class Blokus:
         return valid
                     
     def get_valid_moves(self):
+        if (self.passing[self.P]):
+            self.moves[self.P].append("Pass")
+            return "Pass"
         valid_moves = []
         for piece_name in self.hands[self.P]:
-            orientations = self.get_orientations(self.pieces[piece_name])
-            for orientation in orientations:
+            for orientation in self.orientations[piece_name]:
                 for x in range(self.N):
                     for y in range(self.N):
                         if self.is_valid_move(orientation[0], x, y):
                             valid_moves.append((piece_name, x, y, orientation[1], orientation[2]))
+        if len(valid_moves) == 0:
+            self.passing[self.P] = True
+            self.moves[self.P].append("Pass")
+            return "Pass"
         return valid_moves
     
     def rotate_piece(self, piece):
@@ -113,14 +123,24 @@ class Blokus:
     def reflect_piece(self, piece):
         return [(-dx, dy) for (dx, dy) in piece]
     
+    def normalize_piece(self, piece):
+        min_x = min(x for x, _ in piece)
+        min_y = min(y for _, y in piece)
+        normalized = sorted((x - min_x, y - min_y) for x, y in piece)
+        return tuple(normalized)
+    
     def get_orientations(self, piece):
         orientations = []
+        seen = set()
         cur = piece
         for i in range(4):
+            for refl in [False, True]:
+                temp = self.reflect_piece(cur) if refl else cur
+                normalized = self.normalize_piece(temp)
+                if not normalized in seen:
+                    seen.add(normalized)
+                    orientations.append((temp, i * 90, refl))
             cur = self.rotate_piece(cur)
-            angle = ((i + 1) * 90) % 360
-            orientations.append((cur, angle, False))
-            orientations.append((self.reflect_piece(cur), angle, True))
         return orientations
     
     def get_score(self, player):
@@ -129,26 +149,27 @@ class Blokus:
             score += len(self.pieces[piece_name])
         return score
     
+    def is_over(self):
+        if len(game.moves[0]) > 0 and len(game.moves[1]) > 0 and game.moves[0][-1] == "Pass" and game.moves[1][-1] == "Pass":
+            return True
+        return False
+
+    
 if __name__ == "__main__":
     game = Blokus()
-    one_player = False
-    while True:
+    while not game.is_over():
         valid_moves = game.get_valid_moves()
-        if len(valid_moves) == 0:
-            one_player = True
+        if valid_moves == "Pass":
             game.switch_turn()
-            valid_moves = game.get_valid_moves()
-        if one_player and len(valid_moves) == 0:
-            break
+            continue
         piece_name, x, y, rot, refl = random.choice(valid_moves)
         game.place_piece(piece_name, x, y, rot, refl)
-        if not one_player:
-            game.switch_turn()
+        game.switch_turn()
         print("\033[2J\033[H", end="")
         game.display_board()
         time.sleep(1)
-    print("Player #1 moves:", game.placements[0])
-    print("Player #2 moves:", game.placements[1])
+    print("Player #1 moves:", game.moves[0])
+    print("Player #2 moves:", game.moves[1])
     print("Player #1 remaining pieces:", game.hands[0])
     print("Player #2 remaining pieces:", game.hands[1])
     print("Player #1 score:", game.get_score(0))

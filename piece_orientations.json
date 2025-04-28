@@ -1,0 +1,499 @@
+{
+    "plus": [
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [1, -1], [2, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }
+    ], 
+    "toilet": [
+        {
+            "piece": [[0, 0], [0, 1], [1, 0], [1, -1], [2, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 0], [-1, -1], [-2, 0]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [0, 1], [1, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [0, 1], [-1, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, 0], [-1, 1], [-2, 0]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [1, 0], [1, 1], [2, 0]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [0, -1], [-1, -1], [0, -2]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [0, -1], [1, -1], [0, -2]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "z-shape-5": [
+        {
+            "piece": [[0, 0], [0, 1], [1, 0], [2, 0], [2, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 0], [-2, 0], [-2, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [0, 1], [0, 2], [1, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [0, 1], [0, 2], [-1, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }
+    ], 
+    "staircase": [
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [2, -1], [2, -2]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-2, -1], [-2, -2]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [-2, 1], [-2, 2]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [2, 1], [2, 2]], 
+            "angle": 180, 
+            "reflected": true
+        }
+    ], 
+    "l-shape-5": [
+        {
+            "piece": [[0, 0], [0, -1], [0, -2], [1, -2], [2, -2]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [0, -2], [-1, -2], [-2, -2]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [0, 2], [-1, 2], [-2, 2]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2]], 
+            "angle": 180, 
+            "reflected": true
+        }
+    ], 
+    "t-shape-5": [
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [-2, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [2, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-1, -2], [-2, 0]], 
+            "angle": 180, 
+            "reflected": false
+        }
+    ], 
+    "twig": [
+        {
+            "piece": [[0, 0], [0, -1], [1, -1], [0, -2], [0, -3]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1], [0, -2], [0, -3]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [2, 0], [3, 0]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [-2, 0], [-3, 0]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [0, 2], [0, 3]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [0, 2], [0, 3]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-2, 0], [-3, 0]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [2, 0], [3, 0]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "c-shape": [
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [1, -2], [0, -2]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-1, -2], [0, -2]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [2, 1], [2, 0]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1], [-2, -1], [-2, 0]], 
+            "angle": 270, 
+            "reflected": false
+        }
+    ], 
+    "hand": [
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [0, -1], [1, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [0, -1], [-1, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [1, 0], [1, 1]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [-1, 0], [-1, 1]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [0, 1], [-1, 1]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [0, 1], [1, 1]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [1, -1], [-1, 0], [-1, -1]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1], [1, 0], [1, -1]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "lightning": [
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [2, -1], [3, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-2, -1], [-3, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [-1, 2], [-1, 3]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [-2, 1], [-3, 1]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [2, 1], [3, 1]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1], [-1, -2], [-1, -3]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [1, -1], [1, -2], [1, -3]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "long-l-shape": [
+        {
+            "piece": [[0, 0], [0, 1], [1, 0], [2, 0], [3, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 0], [-2, 0], [-3, 0]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [0, 1], [0, 2], [0, 3]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [0, 1], [0, 2], [0, 3]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, 0], [-2, 0], [-3, 0]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [1, 0], [2, 0], [3, 0]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [0, -1], [0, -2], [0, -3]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [0, -1], [0, -2], [0, -3]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "line-5": [
+        {
+            "piece": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]], 
+            "angle": 90, 
+            "reflected": false
+        }
+    ], 
+    "z-shape-4": [
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [2, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-2, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [1, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [-1, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }
+    ], 
+    "square-4": [
+        {
+            "piece": [[0, 0], [1, 0], [0, -1], [1, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }
+    ], 
+    "t-shape-4": [
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [2, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [-2, 0]], 
+            "angle": 180, 
+            "reflected": false
+        }
+    ], 
+    "l-shape-4": [
+        {
+            "piece": [[0, 0], [0, -1], [1, -1], [2, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1], [-2, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, 1], [1, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, 1], [-1, 2]], 
+            "angle": 90, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1], [-2, 1]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1], [2, 1]], 
+            "angle": 180, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [-1, 0], [-1, -1], [-1, -2]], 
+            "angle": 270, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [1, 0], [1, -1], [1, -2]], 
+            "angle": 270, 
+            "reflected": true
+        }
+    ], 
+    "line-4": [
+        {
+            "piece": [[0, 0], [1, 0], [2, 0], [3, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [0, 2], [0, 3]], 
+            "angle": 90, 
+            "reflected": false
+        }
+    ], 
+    "l-shape-3": [
+        {
+            "piece": [[0, 0], [0, -1], [1, -1]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, -1], [-1, -1]], 
+            "angle": 0, 
+            "reflected": true
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [-1, 1]], 
+            "angle": 180, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [1, 1]], 
+            "angle": 180, 
+            "reflected": true
+        }
+    ], 
+    "line-3": [
+        {
+            "piece": [[0, 0], [1, 0], [2, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1], [0, 2]], 
+            "angle": 90, 
+            "reflected": false
+        }
+    ], 
+    "line-2": [
+        {
+            "piece": [[0, 0], [1, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }, 
+        {
+            "piece": [[0, 0], [0, 1]], 
+            "angle": 90, 
+            "reflected": false
+        }
+    ], 
+    "square-1": [
+        {
+            "piece": [[0, 0]], 
+            "angle": 0, 
+            "reflected": false
+        }
+    ]
+}
