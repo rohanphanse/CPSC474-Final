@@ -57,7 +57,6 @@ orientations = {piece_name: get_orientations(piece) for piece_name, piece in pie
 N = 14 # Board size
 players = ["\033[34m□\033[0m", "\033[31m□\033[0m"]
 players_filled = ["\033[34m■\033[0m", "\033[31m■\033[0m"]
-moves = [[], []]
 
 # State
 class BlokusState:
@@ -84,7 +83,7 @@ class BlokusState:
                         print(players_filled[player], end = " ")
                     else:
                         print(self.board[r][x], end = " ")
-                print()  
+                print()
         else:
             for row in self.board:
                 print(" ".join(row))
@@ -149,7 +148,7 @@ class BlokusState:
                     return False
         return valid
                     
-    def get_actions(self):
+    def get_actions_full(self):
         if (self.passing[self.P]):
             return "Pass"
         valid_moves = []
@@ -162,6 +161,48 @@ class BlokusState:
         if len(valid_moves) == 0:
             return "Pass"
         return valid_moves
+
+    def get_actions(self):
+        if self.passing[self.P]:
+            return "Pass"
+        valid_moves = []
+        player = self.P
+        is_first_move = len(self.hands[player]) == num_pieces
+        if is_first_move:
+            start_x, start_y = (4, 4) if player == 0 else (9, 9)
+            for piece_name in self.hands[player]:
+                for orientation in orientations[piece_name]:
+                    piece = orientation[0]
+                    for dx, dy in piece:
+                        x = start_x + dx
+                        y = start_y + dy
+                        if self.is_valid_move(piece, x, y):
+                            valid_moves.append((piece_name, x, y, orientation[1], orientation[2]))
+            return valid_moves
+        # Find anchor points first
+        anchor_points = []
+        for y in range(N):
+            for x in range(N):
+                if self.board[y][x] == players[player]:
+                    for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                        new_x = x + dx
+                        new_y = y + dy
+                        if 0 <= new_x < N and 0 <= new_y < N and self.board[N - 1 - new_y][new_x] == ".":
+                            anchor_points.append((new_x, new_y))
+        anchor_points = list(set(anchor_points))
+        for piece_name in self.hands[player]:
+            for orientation in orientations[piece_name]:
+                piece = orientation[0]
+                for ax, ay in anchor_points:
+                    for dx, dy in piece:
+                        x = ax + dx
+                        y = ay + dy
+                        if 0 <= x < N and 0 <= y < N:
+                            if self.is_valid_move(piece, x, y):
+                                valid_moves.append((piece_name, x, y, orientation[1], orientation[2]))
+        if len(valid_moves) == 0:
+            return self.get_actions_full()
+        return list(set(valid_moves))
     
     def get_score(self, player):
         score = 0
@@ -200,22 +241,3 @@ class BlokusState:
         new_hands = [hand.copy() for hand in self.hands]
         new_passing = self.passing.copy()
         return BlokusState(new_board, new_hands, self.P, new_passing)
-    
-if __name__ == "__main__":
-    state = BlokusState() # Initial state
-    # Random agent vs. random agent
-    while not state.is_terminal():
-        actions = state.get_actions()
-        random_action = actions if actions == "Pass" else random.choice(actions)
-        moves[state.P].append(random_action)
-        state = state.successor(random_action)
-        print("\033[2J\033[H", end="")
-        state.display_board()
-        print(f"Player #{2 - state.P} chose: {random_action}")
-        time.sleep(1)
-    # print("Player #1 moves:", moves[0])
-    # print("Player #2 moves:", moves[1])
-    print("Player #1 remaining pieces:", state.hands[0])
-    print("Player #2 remaining pieces:", state.hands[1])
-    print("Player #1 score:", state.get_score(0))
-    print("Player #2 score:", state.get_score(1))
