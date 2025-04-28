@@ -4,7 +4,6 @@ import math
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
-
 from blokus import *
 
 class MCTSNode():
@@ -21,7 +20,7 @@ class MCTSNode():
 def build_mcts_tree(state, cpu_time_limit):
     start_time = time.perf_counter()
     root = MCTSNode(state)
-    exploration_constant = 2
+    exploration_constant = 1.5
     while True:
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time >= cpu_time_limit - 0.0001:
@@ -126,32 +125,81 @@ def mcts_policy(cpu_time_limit):
         return best_action, top_actions
     return policy
 
+def greedy_policy():
+    def policy(state):
+        actions = state.get_actions()
+        if actions == "Pass":
+            return "Pass", [(0, "Pass")]
+        action_pairs = []
+        cur_actions = state.successor("Pass").get_actions()
+        for action in actions:
+            new_state = state.successor(action)
+            score = calculate_move_score(state, cur_actions, new_state.get_actions(), action)
+            action_pairs.append((score, action))
+        max_score = max(score for score, _ in action_pairs)
+        best_pairs = [x for x in action_pairs if x[0] == max_score]
+        top_actions = []
+        if len(best_pairs) >= 5:
+            top_actions = random.sample(best_pairs, k = 5)
+        else:
+            top_actions = sorted(action_pairs, reverse = True)[:5]
+        best_action = top_actions[0][1]
+        return best_action, top_actions
+    return policy
+
+def calculate_move_score(cur_state, cur_actions, new_actions, action):
+    piece_name, x, y, _, _ = action
+    score = 0
+    piece_size = len(pieces[piece_name])
+    score += piece_size * 2
+    if (x == 0 or x == N - 1) and (y == 0 or y == N - 1):
+        score += 10
+    if len(cur_actions) < len(new_actions):
+        score += 15
+    if num_pieces - len(cur_state.hands[cur_state.P]) < 5:
+        center_dist = (abs(x - N // 2) + abs(y - N // 2))
+        score += (N // 2 - center_dist) * 0.5
+    return score
+
 if __name__ == "__main__":
+    print("\033[2J\033[H", end="")
     print("# CPU cores:", multiprocessing.cpu_count())
     state = BlokusState() # Initial state
-    mcts_player = mcts_policy(cpu_time_limit=2.0)
-    # MCTS agent vs. random agent
+    mcts_player = mcts_policy(cpu_time_limit=1.0)
+    greedy_player = greedy_policy()
+    player_2 = "greedy"
+    turn = 1
     while not state.is_terminal():
         action = None
         top_actions = None
-        p1 = False
+        greedy = True
         if state.P == 0:
-            action, top_actions = mcts_player(state)
-            p1 = True
+            if turn < 10:
+                action, top_actions = greedy_player(state)
+            else:
+                action, top_actions = mcts_player(state)
+                greedy = False
+        elif player_2 == "greedy":
+            action, top_actions = greedy_player(state)
         else:
             actions = state.get_actions()
             action = actions if actions == "Pass" else random.choice(actions)
         player = state.P
         state = state.successor(action)
         print("\033[2J\033[H", end="")
+        print("Player #1 (Greedy Start + MCTS) vs. Player #2 (Greedy)")
         state.display_board(action, player)
-        print(f"Player #{2 - state.P} chose: {action}")
+        print(f"Turn {turn} - Player #{2 - state.P} chose: {action}")
         if top_actions:
             print("Top actions:")
-            for i, top_action in enumerate(top_actions):
-                print(f"{i + 1}.", top_action[0], " - visits:", top_action[1]["visits"])
-        if p1:
-            input("Press enter to continue...")
+            if not greedy:
+                for i, top_action in enumerate(top_actions):
+                    print(f"  {i + 1}.", top_action[0], " - visits:", top_action[1]["visits"])
+            else:
+                for i, top_action in enumerate(top_actions):
+                    print(f"  {i + 1}.", top_action[1], "- score:", top_action[0])
+        turn += 1
+        input("Press enter to continue...")
     # print("Player #1 moves:", moves[0])
     # print("Player #2 moves:", moves[1])
     print("Player #1 remaining pieces:", state.hands[0])
