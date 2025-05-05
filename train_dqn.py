@@ -6,6 +6,7 @@ from blokus_env import BlokusEnv
 from dqn_agent import DQNAgent
 from greedy import greedy_policy
 
+# roughly 80 episodes a minute on cluster...
 def train_dqn(
     num_episodes=10000,
     target_update=10,
@@ -16,6 +17,7 @@ def train_dqn(
     reward_log_path='reward_log.csv'
 ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Using device {}...".format(device))
     greedy = greedy_policy()
     env = BlokusEnv(opponent_policy=greedy)
     agent = DQNAgent(

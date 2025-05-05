@@ -7,6 +7,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from blokus import *
 from greedy import *
 
+from blokus_env import BlokusEnv
+from dqn_agent import DQNAgent
+import torch
+import numpy as np
+
 class MCTSNode():
     __slots__ = ("state", "parent", "action", "num_visits", "value", "children")
 
@@ -116,6 +121,22 @@ def mcts_policy(cpu_time_limit, player_2 = False):
         return best_action, top_actions, total_visits
     return policy
 
+def dqn_policy(model_path='dqn_blokus.pth'):
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    from greedy import greedy_policy
+    greedy = greedy_policy()
+    env = BlokusEnv(opponent_policy=greedy)
+    agent = DQNAgent(env.observation_size, env.action_size, device=device)
+    agent.load(model_path)
+    def policy(state):
+        # Set the environment's state to the current state
+        env.state = state.copy()
+        obs = env.encode_state(state)
+        valid_action_indices = env.get_valid_action_indices()
+        action_idx = agent.select_action(obs, valid_action_indices, epsilon=0.0)
+        action = env.decode_action(action_idx)
+        return action, []
+    return policy
 
 if __name__ == "__main__":
     print("\033[2J\033[H", end="")
@@ -124,9 +145,9 @@ if __name__ == "__main__":
     mcts_player_1 = mcts_policy(cpu_time_limit=1.0)
     mcts_player_2 = mcts_policy(cpu_time_limit=1.0, player_2=True)
     greedy_player = greedy_policy()
-    player_1 = input("Player #1 policy ('mcts', 'greedy', 'random'): ")
-    player_2 = input("Player #2 policy ('mcts', 'greedy', 'random'): ")
-    policy_names = { "mcts": "MCTS", "greedy": "Greedy", "random": "Random" }
+    player_1 = input("Player #1 policy ('mcts', 'greedy', 'random', 'dqn'): ")
+    player_2 = input("Player #2 policy ('mcts', 'greedy', 'random', 'dqn'): ")
+    policy_names = { "mcts": "MCTS", "greedy": "Greedy", "random": "Random", "dqn": "DQN" }
     turn = 1
     while not state.is_terminal():
         action = None
@@ -145,6 +166,10 @@ if __name__ == "__main__":
         elif player_policy == "random":
             actions = state.get_actions()
             action = actions if actions == "Pass" else random.choice(actions)
+        elif player_policy == "dqn":
+            if not hasattr(mcts_policy, '_dqn_policy'):
+                mcts_policy._dqn_policy = dqn_policy()
+            action, top_actions = mcts_policy._dqn_policy(state)
         state = state.successor(action)
         print("\033[2J\033[H", end="")
         print(f"Player \033[34m#1\033[0m ({policy_names[player_1]}) vs. Player \033[31m#2\033[0m ({policy_names[player_2]})")
