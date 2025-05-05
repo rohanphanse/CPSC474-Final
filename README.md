@@ -40,7 +40,7 @@ We first ran simulations with a random agent, a greedy agent, and an MCTS agent.
 
 We then trained two different DQN agents, dubbed **DQN1** (trained against a greedy agent) and **DQN2** (trained against a random agent with reward shaping). Both were trained using an adaptation of ``blokus.py`` to a gym environment, shown in ```blokus_env.py``` (this treats the opponent, either greedy or random, as a fixed part of the environment). 
 
-Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned from DQN for the MCTS selection criteria. This final version uses the MCTS trained against greedy, paired with DQN1. 
+Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned from DQN for the MCTS selection criteria. This final version uses the MCTS with greedy rollout, paired with DQN1. 
 
 ![demo 1](https://lh3.googleusercontent.com/pw/AP1GczMRxUOSwPJtMfKsBjaWjvGyW3rc23gOtCI-kPkuTsQ-a8Zd3VmzIXnGoDYdIMvzQt7dUPaTGJASCUrfU1hy0abTT0owitt6g2TjxOTunBtXWOgyRM-6UOHW1eIFkhD8R60SFDWZ66SLx23EziSOwE2C=w1112-h774-s-no-gm)
 
@@ -57,7 +57,7 @@ Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned 
 | MCTS (with greedy rollout) vs. Greedy | 80% (MCTS) | 20% (Greedy) |
 | MCTS+DQN vs. MCTS | 62% (MCTS+DQN) | 38% (MCTS) |
 
-Detailed evaluations can be found in the `/evals` folder for each matchup.
+Detailed evaluations can be found in the `/evals` folder for each matchup. These include the number of games run (which varies depending on the agent), point margin, etc.
 
 ## Observations
 
