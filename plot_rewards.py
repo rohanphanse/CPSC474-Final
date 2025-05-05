@@ -7,7 +7,7 @@ def plot_rewards(csv_path='reward_log.csv', save_path1='reward_plot.png', save_p
     rewards = []
     with open(csv_path, 'r') as csvfile:
         reader = csv.reader(csvfile)
-        next(reader)  # Skip header
+        next(reader)
         for row in reader:
             episodes.append(int(row[0]))
             rewards.append(float(row[1]))

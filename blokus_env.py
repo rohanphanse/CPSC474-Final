@@ -42,7 +42,7 @@ class BlokusEnv:
         return np.concatenate([board_enc.flatten(), hand_enc])
 
     def encode_action(self, action):
-        # Returns the index in action_list
+        # Returns index in action_list
         try:
             return self.action_list.index(action)
         except ValueError:

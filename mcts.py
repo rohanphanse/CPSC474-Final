@@ -47,7 +47,7 @@ def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model_path=None, dqn_we
         state_tensor = torch.tensor(obs, dtype=torch.float32, device=dqn_model.device).unsqueeze(0)
         with torch.no_grad():
             q_values = dqn_model.model(state_tensor).cpu().numpy().flatten()
-            # Get Q-value for the specific action
+            # Get q-value for the specific action
             action_idx = env.encode_action(action)
             return q_values[action_idx] if action_idx is not None else 0
 

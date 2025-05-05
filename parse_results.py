@@ -23,7 +23,7 @@ def load_results(file_path):
     if current_df:
         dfs.append(pd.DataFrame(current_df, columns=['game_count', 'p1', 'p1_score', 'p2', 'p2_score']))
     
-    # Combine all dataframes
+    # Combine all dfs
     df = pd.concat(dfs, ignore_index=True)
     
     # Convert columns to appropriate types
@@ -73,13 +73,11 @@ def calculate_metrics(df):
     }
 
 def plot_results(df, metrics, output_dir):
-    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
-    
-    # Set style
+
     plt.style.use('seaborn')
     
-    # 1. Score Distribution Plot
+    # Score distribution plot
     plt.figure(figsize=(10, 6))
     sns.kdeplot(data=df['p1_score'], label=df['p1'].iloc[0], fill=True)
     sns.kdeplot(data=df['p2_score'], label=df['p2'].iloc[0], fill=True)
@@ -90,7 +88,7 @@ def plot_results(df, metrics, output_dir):
     plt.savefig(os.path.join(output_dir, 'score_distribution.png'))
     plt.close()
     
-    # 2. Score Margin Over Time
+    # Score margin over time
     plt.figure(figsize=(12, 6))
     plt.plot(df['game_count'], df['p2_score'] - df['p1_score'], 
              label='Score Margin (P2 - P1)', alpha=0.6)
@@ -102,7 +100,7 @@ def plot_results(df, metrics, output_dir):
     plt.savefig(os.path.join(output_dir, 'score_margin.png'))
     plt.close()
     
-    # 3. Rolling Win Rate
+    # Rolling win rate
     window_size = min(10, len(df))
     rolling_p1_wins = (df['p2_score'] > df['p1_score']).rolling(window=window_size).mean()
     rolling_p2_wins = (df['p1_score'] > df['p2_score']).rolling(window=window_size).mean()
@@ -134,7 +132,6 @@ def print_metrics(metrics, output_file=None):
     output.append(f"  Player 1 Average Score: {metrics['avg_p1_score']:.2f} ± {metrics['p1_score_std']:.2f}")
     output.append(f"  Player 2 Average Score: {metrics['avg_p2_score']:.2f} ± {metrics['p2_score_std']:.2f}")
     
-    # Print to console
     print('\n'.join(output))
     
     # Save to file if output_file is provided
@@ -149,28 +146,22 @@ def parse_args():
     return parser.parse_args()
 
 def main():
-    # Parse command line arguments
     args = parse_args()
     
-    # Get the directory of the current script
     script_dir = Path(__file__).parent
     
     # Input and output paths
     input_file = script_dir / args.source
     output_dir = script_dir / 'evals' / args.source.split('/')[-1].split('.')[0]
     
-    # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
     
-    # Load and process results
     df = load_results(input_file)
     metrics = calculate_metrics(df)
     
-    # Print metrics to console and save to file
     metrics_file = output_dir / 'metrics.txt'
     print_metrics(metrics, metrics_file)
     
-    # Generate plots
     plot_results(df, metrics, output_dir)
     print(f"\nResults have been saved to: {output_dir}")
 

@@ -40,7 +40,7 @@ class DQNAgent:
         state = torch.tensor(state, dtype=torch.float32, device=self.device).unsqueeze(0)
         with torch.no_grad():
             q_values = self.model(state).cpu().numpy().flatten()
-        # Mask invalid actions
+        # Mask invalid actions, might be "lazy" option
         mask = np.full_like(q_values, -np.inf)
         mask[valid_action_indices] = q_values[valid_action_indices]
         return int(np.argmax(mask))
