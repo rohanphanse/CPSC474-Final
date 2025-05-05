@@ -3,6 +3,9 @@ import time
 import math
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import argparse
+import csv
+
 
 from blokus import *
 from greedy import *
@@ -23,7 +26,12 @@ class MCTSNode():
         self.value = 0
         self.children = []
 
-def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model=None, dqn_weight=0.5):
+def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model_path=None, dqn_weight=0.5):
+    dqn_model = None
+    if dqn_model_path:
+        env = BlokusEnv()
+        dqn_model = DQNAgent(env.observation_size, env.action_size)
+        dqn_model.load(dqn_model_path)
     start_time = time.perf_counter()
     root = MCTSNode(state)
     exploration_constant = 1.4
@@ -107,7 +115,7 @@ def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model=None, dqn_weight=
             cur_node = cur_node.parent
     return root
 
-def mcts_policy(cpu_time_limit, player_2=False, dqn_model=None, dqn_weight=0.5):
+def mcts_policy(cpu_time_limit, player_2=False, dqn_model_path=None, dqn_weight=0.5):
     def policy(state):
         num_workers = multiprocessing.cpu_count()
         results = []
@@ -118,7 +126,7 @@ def mcts_policy(cpu_time_limit, player_2=False, dqn_model=None, dqn_weight=0.5):
                     state.copy(),
                     cpu_time_limit,
                     player_2,
-                    dqn_model,
+                    dqn_model_path,
                     dqn_weight
                 )
                 for _ in range(num_workers)
@@ -160,23 +168,28 @@ def dqn_policy(model_path='dqn_blokus_random.pth'):
         return action, []
     return policy
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Blokus Duo Evaluation")
+    parser.add_argument("--player_1", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #1")
+    parser.add_argument("--player_2", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #2")
+    parser.add_argument("--dqn_model_path", type=str, default=None, choices=["dqn_blokus_random.pth", "dqn_blokus.pth"], help="Path to DQN model")
+    parser.add_argument("--dqn_weight", type=float, default=0.5, help="DQN weight for MCTS+DQN (0.0 to 1.0)")
+    parser.add_argument("--results_path", type=str, help="Path to store evaluation results")
+    parser.add_argument("--num_games", type=int, help="Number of games to evaluate")
+    parser.add_argument("--display", action="store_true", help="Display board?")
+    args = parser.parse_args()
+    return args.player_1, args.player_2, args.dqn_model_path, args.dqn_weight, args.results_path, args.num_games, args.display
+
 if __name__ == "__main__":
     print("\033[2J\033[H", end="")
     print("No. of CPU cores:", multiprocessing.cpu_count())
-    state = BlokusState() # Initial state
-    mcts_player_1 = mcts_policy(cpu_time_limit=1.0)
-    mcts_player_2 = mcts_policy(cpu_time_limit=1.0, player_2=True)
+    state = None
+    time_limit = 1.0
+    mcts_player_1 = mcts_policy(cpu_time_limit=time_limit)
+    mcts_player_2 = mcts_policy(cpu_time_limit=time_limit, player_2=True)
     greedy_player = greedy_policy()
-    player_1 = input("Player #1 policy ('mcts', 'greedy', 'random', 'dqn', 'mcts_dqn'): ")
-    player_2 = input("Player #2 policy ('mcts', 'greedy', 'random', 'dqn', 'mcts_dqn'): ")
     
-    # Handle DQN model path input for dqn and mcts_dqn policies
-    dqn_model_path = None
-    dqn_weight = 0.5
-    if 'dqn' in [player_1, player_2] or 'mcts_dqn' in [player_1, player_2]:
-        dqn_model_path = input("Enter path to DQN model file: ")
-        if 'mcts_dqn' in [player_1, player_2]:
-            dqn_weight = float(input("Enter DQN weight (0.0-1.0): "))
+    player_1, player_2, dqn_model_path, dqn_weight, results_path, num_games, display = parse_args()
     
     policy_names = {
         "mcts": "MCTS",
@@ -188,67 +201,88 @@ if __name__ == "__main__":
     
     # Create appropriate policy instances
     if player_1 == 'mcts_dqn':
-        env = BlokusEnv()
-        dqn_model = DQNAgent(env.observation_size, env.action_size)
-        dqn_model.load(dqn_model_path)
-        mcts_player_1 = mcts_policy(cpu_time_limit=1.0, dqn_model=dqn_model, dqn_weight=dqn_weight)
+        mcts_player_1 = mcts_policy(cpu_time_limit=time_limit, dqn_model_path=dqn_model_path, dqn_weight=dqn_weight)
     elif player_1 == 'dqn':
         dqn_player_1 = dqn_policy(dqn_model_path)
     
     if player_2 == 'mcts_dqn':
-        env = BlokusEnv()
-        dqn_model = DQNAgent(env.observation_size, env.action_size)
-        dqn_model.load(dqn_model_path)
-        mcts_player_2 = mcts_policy(cpu_time_limit=1.0, player_2=True, dqn_model=dqn_model, dqn_weight=dqn_weight)
+        mcts_player_2 = mcts_policy(cpu_time_limit=time_limit, player_2=True, dqn_model_path=dqn_model_path, dqn_weight=dqn_weight)
     elif player_2 == 'dqn':
         dqn_player_2 = dqn_policy(dqn_model_path)
     
-    turn = 1
-    while not state.is_terminal():
-        action = None
-        top_actions = None
-        greedy = True
-        total_visits = None
-        player = state.P
-        player_policy = player_1 if state.P == 0 else player_2
-        if player_policy == "mcts" or player_policy == "mcts_dqn":
-            if player == 0:
-                action, top_actions, total_visits = mcts_player_1(state)
-            else:
-                action, top_actions, total_visits = mcts_player_2(state)
-        elif player_policy == "greedy":
-            action, top_actions = greedy_player(state)
-        elif player_policy == "random":
-            actions = state.get_actions()
-            action = actions if actions == "Pass" else random.choice(actions)
-        elif player_policy == "dqn":
-            if player == 0:
-                action, top_actions = dqn_player_1(state)
-            else:
-                action, top_actions = dqn_player_2(state)
-        state = state.successor(action)
+    with open(results_path, "a") as f:
+        f.write(f"game_count,p1,p1_score,p2,p2_score\n")
+    for game_counter in range(num_games):
         print("\033[2J\033[H", end="")
-        print(f"Player \033[34m#1\033[0m ({policy_names[player_1]}) vs. Player \033[31m#2\033[0m ({policy_names[player_2]})")
-        state.display_board(action, player)
-        if player_policy in ["mcts", "mcts_dqn"]:
-            print(f"Top actions (turn: {turn}, total visits: {total_visits}):")
-            for i, top_action in enumerate(top_actions):
-                prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if i == 0 else ""
-                print(f"  {prefix}{i + 1}.", top_action[0], " - avg. reward:", round(top_action[1]["value"] / (top_action[1]["visits"] + 1e-6), 5), "and visits:", top_action[1]["visits"], "\033[0m")
-        elif player_policy == "greedy":
-            print(f"Top actions (turn: {turn}):")
-            for i, top_action in enumerate(top_actions):
-                prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if top_action[1] == action else ""
-                if top_action[1] == "Pass":
-                    print(f"  {prefix}{i + 1}.", top_action[1], "\033[0m")
+        print("Game:", game_counter + 1)
+        state = BlokusState() # Initial state
+        turn = 1
+        while not state.is_terminal():
+            action = None
+            top_actions = None
+            greedy = True
+            total_visits = None
+            player = state.P
+            player_policy = player_1 if state.P == 0 else player_2
+            if player_policy == "mcts" or player_policy == "mcts_dqn":
+                if player == 0:
+                    action, top_actions, total_visits = mcts_player_1(state)
                 else:
-                    print(f"  {prefix}{i + 1}.", top_action[1], "- score:", top_action[0], "\033[0m")
-        elif player_policy == "random":
-            print(f"Top actions (turn: {turn}):")
-            print(f"  \033[1;97;4{4 if player == 0 else 1}m1. {action}\033[0m")
-        turn += 1
-        input("Press enter to continue...")
-    print("Player #1 remaining pieces:", state.hands[0])
-    print("Player #2 remaining pieces:", state.hands[1])
-    print("Player #1 score:", state.get_score(0))
-    print("Player #2 score:", state.get_score(1))
+                    action, top_actions, total_visits = mcts_player_2(state)
+            elif player_policy == "greedy":
+                action, top_actions = greedy_player(state)
+            elif player_policy == "random":
+                actions = state.get_actions()
+                action = actions if actions == "Pass" else random.choice(actions)
+            elif player_policy == "dqn":
+                if player == 0:
+                    action, top_actions = dqn_player_1(state)
+                else:
+                    action, top_actions = dqn_player_2(state)
+            state = state.successor(action)
+            if display:
+                print("\033[2J\033[H", end="")
+                print(f"Player \033[34m#1\033[0m ({policy_names[player_1]}) vs. Player \033[31m#2\033[0m ({policy_names[player_2]})")
+                state.display_board(action, player)
+                if player_policy in ["mcts", "mcts_dqn"]:
+                    print(f"Top actions (turn: {turn}, total visits: {total_visits}):")
+                    for i, top_action in enumerate(top_actions):
+                        prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if i == 0 else ""
+                        print(f"  {prefix}{i + 1}.", top_action[0], " - avg. reward:", round(top_action[1]["value"] / (top_action[1]["visits"] + 1e-6), 5), "and visits:", top_action[1]["visits"], "\033[0m")
+                elif player_policy == "greedy":
+                    print(f"Top actions (turn: {turn}):")
+                    for i, top_action in enumerate(top_actions):
+                        prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if top_action[1] == action else ""
+                        if top_action[1] == "Pass":
+                            print(f"  {prefix}{i + 1}.", top_action[1], "\033[0m")
+                        else:
+                            print(f"  {prefix}{i + 1}.", top_action[1], "- score:", top_action[0], "\033[0m")
+                elif player_policy == "random":
+                    print(f"Top actions (turn: {turn}):")
+                    print(f"  \033[1;97;4{4 if player == 0 else 1}m1. {action}\033[0m")
+            turn += 1
+        # print("Player #1 remaining pieces:", state.hands[0])
+        # print("Player #2 remaining pieces:", state.hands[1])
+        # print("Player #1 score:", state.get_score(0))
+        # print("Player #2 score:", state.get_score(1))
+        with open(results_path, "a") as f:
+            f.write(f"{game_counter + 1},{player_1},{state.get_score(0)},{player_2},{state.get_score(1)}\n")
+    with open(results_path, "r") as f:
+        reader = csv.DictReader(f)
+        win_count = 0
+        points_margin = 0
+        win_margin = 0
+        total_games = 0
+        for row in reader:
+            p1_score = int(row["p1_score"])
+            p2_score = int(row["p2_score"])
+            points_margin += p2_score - p1_score
+            win_margin += 0 if max(p1_score, p2_score) == 0 else (p2_score - p1_score) / max(p1_score, p2_score)
+            if p1_score < p2_score:
+                win_count += 1
+            elif p1_score == p2_score:
+                win_count += 0.5
+            total_games += 1
+        print(f"Average win rate: {win_count / total_games}")
+        print(f"Average points win margin: {points_margin / total_games}")
+        print(f"Average win margin: {win_margin / total_games}")
