@@ -4,7 +4,7 @@ python3 mcts.py --player_1 greedy --player_2 random --results_path greedy_vs_ran
 
 python3 mcts.py --player_1 mcts --player_2 greedy --results_path mcts_greedy_vs_greedy.txt --num_games 500
 
-python3 mcts.py --player_1 mcts --player_2 greedy --results_path mcts_random_vs_greedy.txt --num_games 0
+python3 mcts.py --player_1 mcts --player_2 greedy --results_path mcts_random_vs_greedy.txt --num_games 500
 
 python3 mcts.py --player_1 dqn --player_2 greedy --dqn_model_path dqn_models/dqn_blokus_dqn1.pth --results_path dqn1_vs_greedy.txt --num_games 100
 
