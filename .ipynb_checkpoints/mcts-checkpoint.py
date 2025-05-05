@@ -23,12 +23,26 @@ class MCTSNode():
         self.value = 0
         self.children = []
 
-def build_mcts_tree(state, cpu_time_limit, player_2):
+def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model=None, dqn_weight=0.5):
     start_time = time.perf_counter()
     root = MCTSNode(state)
     exploration_constant = 1.4
     greedy_player = greedy_policy()
     check = 1 if player_2 else 0
+    
+    # Convert state to tensor for DQN if model is provided
+    def get_q_value(state, action):
+        if dqn_model is None:
+            return 0
+        env = BlokusEnv()  # Create temporary env for state encoding
+        obs = env.encode_state(state)
+        state_tensor = torch.tensor(obs, dtype=torch.float32, device=dqn_model.device).unsqueeze(0)
+        with torch.no_grad():
+            q_values = dqn_model.model(state_tensor).cpu().numpy().flatten()
+            # Get Q-value for the specific action
+            action_idx = env.encode_action(action)
+            return q_values[action_idx] if action_idx is not None else 0
+
     while True:
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time >= cpu_time_limit - 0.0001:
@@ -37,27 +51,33 @@ def build_mcts_tree(state, cpu_time_limit, player_2):
         # Selection 
         while len(cur_node.children) > 0 and not cur_node.state.is_terminal():
             best_child = None
-            best_ucb_score = None
+            best_score = None
             if cur_node.state.actor() == check:
                 for child in cur_node.children:
                     if child.num_visits == 0:
                         best_child = child
                         break
                     else:
+                        # Combine UCB with Q-value
                         ucb_score = child.value / child.num_visits + exploration_constant * math.sqrt(math.log(cur_node.num_visits) / child.num_visits)
-                        if best_child is None or ucb_score > best_ucb_score:
+                        q_value = get_q_value(cur_node.state, child.action)
+                        combined_score = ucb_score + dqn_weight * q_value
+                        if best_child is None or combined_score > best_score:
                             best_child = child
-                            best_ucb_score = ucb_score
+                            best_score = combined_score
             else:
                 for child in cur_node.children:
                     if child.num_visits == 0:
                         best_child = child
                         break
                     else:
+                        # Combine UCB with Q-value (negative for opponent)
                         ucb_score = child.value / child.num_visits - exploration_constant * math.sqrt(math.log(cur_node.num_visits) / child.num_visits)
-                        if best_child is None or ucb_score < best_ucb_score:
+                        q_value = get_q_value(cur_node.state, child.action)
+                        combined_score = ucb_score - dqn_weight * q_value
+                        if best_child is None or combined_score < best_score:
                             best_child = child
-                            best_ucb_score = ucb_score
+                            best_score = combined_score
             cur_node = best_child
         # Expansion
         if not cur_node.state.is_terminal() and len(cur_node.children) == 0:
@@ -87,7 +107,7 @@ def build_mcts_tree(state, cpu_time_limit, player_2):
             cur_node = cur_node.parent
     return root
 
-def mcts_policy(cpu_time_limit, player_2 = False):
+def mcts_policy(cpu_time_limit, player_2=False, dqn_model=None, dqn_weight=0.5):
     def policy(state):
         num_workers = multiprocessing.cpu_count()
         results = []
@@ -97,7 +117,9 @@ def mcts_policy(cpu_time_limit, player_2 = False):
                     build_mcts_tree,
                     state.copy(),
                     cpu_time_limit,
-                    player_2
+                    player_2,
+                    dqn_model,
+                    dqn_weight
                 )
                 for _ in range(num_workers)
             ]
@@ -121,7 +143,7 @@ def mcts_policy(cpu_time_limit, player_2 = False):
         return best_action, top_actions, total_visits
     return policy
 
-def dqn_policy(model_path='dqn_blokus.pth'):
+def dqn_policy(model_path='dqn_blokus_random.pth'):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     from greedy import greedy_policy
     greedy = greedy_policy()
@@ -145,9 +167,42 @@ if __name__ == "__main__":
     mcts_player_1 = mcts_policy(cpu_time_limit=1.0)
     mcts_player_2 = mcts_policy(cpu_time_limit=1.0, player_2=True)
     greedy_player = greedy_policy()
-    player_1 = input("Player #1 policy ('mcts', 'greedy', 'random', 'dqn'): ")
-    player_2 = input("Player #2 policy ('mcts', 'greedy', 'random', 'dqn'): ")
-    policy_names = { "mcts": "MCTS", "greedy": "Greedy", "random": "Random", "dqn": "DQN" }
+    player_1 = input("Player #1 policy ('mcts', 'greedy', 'random', 'dqn', 'mcts_dqn'): ")
+    player_2 = input("Player #2 policy ('mcts', 'greedy', 'random', 'dqn', 'mcts_dqn'): ")
+    
+    # Handle DQN model path input for dqn and mcts_dqn policies
+    dqn_model_path = None
+    dqn_weight = 0.5
+    if 'dqn' in [player_1, player_2] or 'mcts_dqn' in [player_1, player_2]:
+        dqn_model_path = input("Enter path to DQN model file: ")
+        if 'mcts_dqn' in [player_1, player_2]:
+            dqn_weight = float(input("Enter DQN weight (0.0-1.0): "))
+    
+    policy_names = {
+        "mcts": "MCTS",
+        "greedy": "Greedy",
+        "random": "Random",
+        "dqn": "DQN",
+        "mcts_dqn": "MCTS+DQN"
+    }
+    
+    # Create appropriate policy instances
+    if player_1 == 'mcts_dqn':
+        env = BlokusEnv()
+        dqn_model = DQNAgent(env.observation_size, env.action_size)
+        dqn_model.load(dqn_model_path)
+        mcts_player_1 = mcts_policy(cpu_time_limit=1.0, dqn_model=dqn_model, dqn_weight=dqn_weight)
+    elif player_1 == 'dqn':
+        dqn_player_1 = dqn_policy(dqn_model_path)
+    
+    if player_2 == 'mcts_dqn':
+        env = BlokusEnv()
+        dqn_model = DQNAgent(env.observation_size, env.action_size)
+        dqn_model.load(dqn_model_path)
+        mcts_player_2 = mcts_policy(cpu_time_limit=1.0, player_2=True, dqn_model=dqn_model, dqn_weight=dqn_weight)
+    elif player_2 == 'dqn':
+        dqn_player_2 = dqn_policy(dqn_model_path)
+    
     turn = 1
     while not state.is_terminal():
         action = None
@@ -156,7 +211,7 @@ if __name__ == "__main__":
         total_visits = None
         player = state.P
         player_policy = player_1 if state.P == 0 else player_2
-        if player_policy == "mcts":
+        if player_policy == "mcts" or player_policy == "mcts_dqn":
             if player == 0:
                 action, top_actions, total_visits = mcts_player_1(state)
             else:
@@ -167,14 +222,15 @@ if __name__ == "__main__":
             actions = state.get_actions()
             action = actions if actions == "Pass" else random.choice(actions)
         elif player_policy == "dqn":
-            if not hasattr(mcts_policy, '_dqn_policy'):
-                mcts_policy._dqn_policy = dqn_policy()
-            action, top_actions = mcts_policy._dqn_policy(state)
+            if player == 0:
+                action, top_actions = dqn_player_1(state)
+            else:
+                action, top_actions = dqn_player_2(state)
         state = state.successor(action)
         print("\033[2J\033[H", end="")
         print(f"Player \033[34m#1\033[0m ({policy_names[player_1]}) vs. Player \033[31m#2\033[0m ({policy_names[player_2]})")
         state.display_board(action, player)
-        if player_policy == "mcts":
+        if player_policy in ["mcts", "mcts_dqn"]:
             print(f"Top actions (turn: {turn}, total visits: {total_visits}):")
             for i, top_action in enumerate(top_actions):
                 prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if i == 0 else ""
