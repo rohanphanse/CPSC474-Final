@@ -76,4 +76,4 @@ Our complete results take hours to obtain, due to the branching factor of MCTS a
 ./test.sh
 ```
 
-The **DQN1** model was trained using `python3 train_dqn.py`, and the **DQN2** model was trained using `python3 train_dqn_random.py`. All evals in the `/evals` folder were generated using `parse_results.py`.
+The **DQN1** model was trained using `python3 train_dqn.py`, and the **DQN2** model was trained using `python3 train_dqn_random.py`. All evals in the `/evals` folder were generated using `python3 parse_results.py --source [agent_runs/matchup]`.
