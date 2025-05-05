@@ -28,16 +28,16 @@ Note that Blokus has very large state space (exceeding $10^{100}$).
 
 ## Research Question
 
-How much does integrating DQN-learned Q-values into MCTS improve agent performance compared to using MCTS or DQN alone? Does this improvement depend on the quality of the training regimen of DQN and MCTS (e.g., trained against greedy vs. random)?
+Hw much does integrating DQN-learned Q-values into MCTS improve agent performance compared to using MCTS or DQN alone? Does this improvement depend on the quality of the training regimen of DQN and the rollout policy for MCTS (e.g., greedy vs. random)?
 
 ## Agents
 
 
 We first ran simulations with a random agent, a greedy agent, and an MCTS agent. We parallelize MCTS by building and merging multiple trees, use a greedy agent for stronger simulations with faster convergence, and accelerate action generation by precomputing piece orientations and focusing on anchor points.
 
-We then trained two different DQN agents, dubbed **DQN1** (trained against a greedy agent) and **DQN2** (trained against a random agent with reward shaping). Both were trained using an adaptation of ``blokus.py`` to a gym environment, shown in ```blokus_env.py``` (this treats the opponent, either greedy or random, as a fixed part of the environment).
+We then trained two different DQN agents, dubbed **DQN1** (trained against a greedy agent) and **DQN2** (trained against a random agent with reward shaping). Both were trained using an adaptation of ``blokus.py`` to a gym environment, shown in ```blokus_env.py``` (this treats the opponent, either greedy or random, as a fixed part of the environment). 
 
-Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned from DQN for the MCTS selection criteria. This final version uses the MCTS trained against greedy, paired with DQN1.
+Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned from DQN for the MCTS selection criteria. This final version uses the MCTS trained against greedy, paired with DQN1. 
 
 ![demo 1](https://lh3.googleusercontent.com/pw/AP1GczMRxUOSwPJtMfKsBjaWjvGyW3rc23gOtCI-kPkuTsQ-a8Zd3VmzIXnGoDYdIMvzQt7dUPaTGJASCUrfU1hy0abTT0owitt6g2TjxOTunBtXWOgyRM-6UOHW1eIFkhD8R60SFDWZ66SLx23EziSOwE2C=w1112-h774-s-no-gm)
 
@@ -46,12 +46,12 @@ Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned 
 | Matchup | Win Rate (Player 1) |  Win Rate (Player 2) |
 |------------------------------------------|---------------------|---------------------|
 | Greedy vs. Random | 94% (Greedy) | 6% (Random) |
-| DQN1 vs. Greedy | 13% (DQN1) | 87% (Greedy) |
-| DQN1 vs. Random | 62% (DQN1) | 38% (Random) |
+| DQN1 vs. Greedy | 15% (DQN1) | 85% (Greedy) |
+| DQN1 vs. Random | 65% (DQN1) | 35% (Random) |
 | DQN2 vs. Greedy | 6% (DQN2) | 94% (Greedy) |
-| DQN2 vs. Random | 38% (DQN2) | 62% (Random) |
-| MCTS (trained with random) vs. Greedy | 59% (MCTS) | 41% (Greedy) |
-| MCTS (trained with greedy) vs. Greedy | 80% (MCTS) | 20% (Greedy) |
+| DQN2 vs. Random | 41% (DQN2) | 59% (Random) |
+| MCTS (with random rollout) vs. Greedy | 59% (MCTS) | 41% (Greedy) |
+| MCTS (with greedy rollout) vs. Greedy | 80% (MCTS) | 20% (Greedy) |
 | MCTS+DQN vs. MCTS | 62% (MCTS+DQN) | 38% (MCTS) |
 
 Detailed evaluations can be found in the `/evals` folder for each matchup.
@@ -93,4 +93,4 @@ Our complete results take hours to obtain, due to the branching factor of MCTS a
 ./test.sh
 ```
 
-The **DQN1** model was trained using `python3 train_dqn.py`, and the **DQN2** model was trained using `python3 train_dqn_random.py`. All evals in the `/evals` folder were generated using `python3 parse_results.py --source [agent_runs/matchup]`.
+The **DQN1** model was trained using `python3 train_dqn.py`, and the **DQN2** model was trained using `python3 train_dqn_random.py`. Hyperparameters for the DQN architecture and training process are included in these files. All evals in the `/evals` folder were generated using `python3 parse_results.py --source [agent_runs/matchup]`. Information about the evaluation setup (i.e. number of games run) and more detailed statistics + plots of the results are included in `/evals`.
