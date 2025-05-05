@@ -7,6 +7,8 @@ By: Rohan Phanse and Areeb Gani
 To run the short demo for a few minutes (a sample of matchups), run the following command:
 
 ```bash
+# Install dependencies
+pip install -r requirements.txt
 # Run demo
 python3 demo.py
 ```
@@ -26,7 +28,7 @@ Note that Blokus has very large state space (exceeding $10^{100}$).
 
 ## Research Question
 
-Hw much does integrating DQN-learned Q-values into MCTS improve agent performance compared to using MCTS or DQN alone? Does this improvement depend on the quality of the training regimen of DQN and MCTS (e.g., trained against greedy vs. random)?
+How much does integrating DQN-learned Q-values into MCTS improve agent performance compared to using MCTS or DQN alone? Does this improvement depend on the quality of the training regimen of DQN and MCTS (e.g., trained against greedy vs. random)?
 
 ## Agents
 
@@ -51,6 +53,8 @@ Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned 
 | MCTS (trained with random) vs. Greedy | 59% (MCTS) | 41% (Greedy) |
 | MCTS (trained with greedy) vs. Greedy | 80% (MCTS) | 20% (Greedy) |
 | MCTS+DQN vs. MCTS | 62% (MCTS+DQN) | 38% (MCTS) |
+
+Detailed evaluations can be found in the `/evals` folder for each matchup.
 
 ## Observations
 
