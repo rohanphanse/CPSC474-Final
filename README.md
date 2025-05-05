@@ -10,7 +10,8 @@ To run the short demo for a few minutes (a sample of matchups), run the followin
 # Install dependencies
 pip install -r requirements.txt
 # Run demo
-python3 demo.py
+make
+./BlokusDemo
 ```
 
 Full reproducibility instructions are at the bottom of the README.
