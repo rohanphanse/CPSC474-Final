@@ -2,6 +2,8 @@
 
 By: Rohan Phanse and Areeb Gani
 
+Link to repository: https://github.com/rohanphanse/CPSC474-Final
+
 ## Demo
 
 To run the short demo for a few minutes (a sample of matchups), run the following command:

@@ -1,3 +1,4 @@
+# Group members: Rohan Phanse and Areeb Gani
 import random
 import time
 import math
