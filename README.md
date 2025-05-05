@@ -41,16 +41,16 @@ Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned 
 
 
 ## Evaluation Results
-| Matchup | Win Rate (Player 1) |
-|------------------------------------------|---------------------|
-| Greedy vs. Random | 94% (Greedy) |
-| DQN1 vs. Greedy | 13% (DQN1) |
-| DQN1 vs. Random | 62% (DQN1) |
-| DQN2 vs. Greedy | 6% (DQN2) |
-| DQN2 vs. Random | 38% (DQN2) |
-| MCTS (trained with random) vs. Greedy | 59% (MCTS) |
-| MCTS (trained with greedy) vs. Greedy | 78% (MCTS) |
-| MCTS+DQN vs. MCTS | 62% (MCTS+DQN) |
+| Matchup | Win Rate (Player 1) |  Win Rate (Player 2) |
+|------------------------------------------|---------------------|---------------------|
+| Greedy vs. Random | 94% (Greedy) | 6% (Random) |
+| DQN1 vs. Greedy | 13% (DQN1) | 87% (Greedy) |
+| DQN1 vs. Random | 62% (DQN1) | 38% (Random) |
+| DQN2 vs. Greedy | 6% (DQN2) | 94% (Greedy) |
+| DQN2 vs. Random | 38% (DQN2) | 62% (Random) |
+| MCTS (trained with random) vs. Greedy | 59% (MCTS) | 41% (Greedy) |
+| MCTS (trained with greedy) vs. Greedy | 80% (MCTS) | 20% (Greedy) |
+| MCTS+DQN vs. MCTS | 62% (MCTS+DQN) | 38% (MCTS) |
 
 ## Observations
 
@@ -73,7 +73,7 @@ Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned 
 | `train_dqn_random.py` | Script to train DQN2 (against random agent with reward shaping). |
 | `demo.py` | Script to run a short demo of agent matchups. |
 | `parse_results.py` | Script to parse and analyze evaluation results, generate plots/statistics. |
-| `agent_runs/` | Folder containing raw results of agent matchups (CSV or TXT files). |
+| `agent_runs/` | Folder containing raw results of agent matchups. |
 | `evals/` | Folder containing parsed results, plots, and metrics for each matchup. |
 | `dqn_models/` | Saved DQN model weights. |
 | `dqn_reward_logs/` | Reward logs from DQN training runs. |
