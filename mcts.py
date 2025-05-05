@@ -104,6 +104,8 @@ def build_mcts_tree(state, cpu_time_limit, player_2, dqn_model_path=None, dqn_we
         cur_state = cur_node.state
         while not cur_state.is_terminal():
             action, _ = greedy_player(cur_state)
+            # cur_actions = cur_state.get_actions()
+            # action = cur_actions if cur_actions == "Pass" else random.choice(cur_actions)
             cur_state = cur_state.successor(action)
         payoff = cur_state.payoff()
         if player_2:
@@ -151,7 +153,7 @@ def mcts_policy(cpu_time_limit, player_2=False, dqn_model_path=None, dqn_weight=
         return best_action, top_actions, total_visits
     return policy
 
-def dqn_policy(model_path='dqn_models/dqn_blokus_dqn1.pth'):
+def dqn_policy(model_path='dqn_blokus_random.pth'):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     from greedy import greedy_policy
     greedy = greedy_policy()
@@ -172,7 +174,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Blokus Duo Evaluation")
     parser.add_argument("--player_1", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #1")
     parser.add_argument("--player_2", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #2")
-    parser.add_argument("--dqn_model_path", type=str, default=None, choices=["dqn_models/dqn_blokus_dqn1.pth", "dqn_models/dqn_blokus_dqn2.pth"], help="Path to DQN model")
+    parser.add_argument("--dqn_model_path", type=str, default=None, choices=["dqn_blokus_random.pth", "dqn_blokus.pth"], help="Path to DQN model")
     parser.add_argument("--dqn_weight", type=float, default=0.5, help="DQN weight for MCTS+DQN (0.0 to 1.0)")
     parser.add_argument("--results_path", type=str, help="Path to store evaluation results")
     parser.add_argument("--num_games", type=int, help="Number of games to evaluate")
@@ -210,8 +212,9 @@ if __name__ == "__main__":
     elif player_2 == 'dqn':
         dqn_player_2 = dqn_policy(dqn_model_path)
     
-    with open(results_path, "a") as f:
-        f.write(f"game_count,p1,p1_score,p2,p2_score\n")
+    if num_games > 0:
+        with open(results_path, "a") as f:
+            f.write(f"game_count,p1,p1_score,p2,p2_score\n")
     for game_counter in range(num_games):
         print("\033[2J\033[H", end="")
         print("Game:", game_counter + 1)

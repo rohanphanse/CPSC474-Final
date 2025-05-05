@@ -157,7 +157,7 @@ def main():
     
     # Input and output paths
     input_file = script_dir / args.source
-    output_dir = script_dir / 'evals' / args.source.split('.')[0]
+    output_dir = script_dir / 'evals' / args.source.split('/')[-1].split('.')[0]
     
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
