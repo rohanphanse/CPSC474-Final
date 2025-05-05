@@ -4,10 +4,14 @@ By: Rohan Phanse and Areeb Gani
 
 ## Demo
 
+To run the short demo for a few minutes (a sample of matchups), run the following command:
+
 ```bash
 # Run demo
-pypy3 mcts.py
+python3 demo.py
 ```
+
+Full reproducibility instructions are at the bottom of the README.
 
 ### MCTS Agent
 Because Blokus Duo has a very large state space (exceeding $10^{100}$), we employed the following optimizations in our MCTS agent.
@@ -60,5 +64,16 @@ We ran simulations with a random agent, a greedy agent, and an MCTS agent. We al
 
 - The greedy agent is a very strong baseline, easily defeating random play and both DQN agents.
 - MCTS agents, especially when simulations use the greedy policy, are much stronger than random and competitive with the greedy agent.
-- Combining MCTS with DQN (MCTS+DQN) yields a significant improvement over vanilla MCTS, even if the DQN agents on their own are not as powerful.
+- Combining MCTS with DQN (MCTS+DQN) yields an improvement over vanilla MCTS, even if the DQN agents on their own are not as powerful.
 - Due to the large state space and squishing of $Q$-values, the DQN agents took a long time to train and exhibited great stochasticity. In the future, smarter reward shaping, modifications to architecture/hyperparameters, and different training scheme (e.g. with the masking loss function) could aid performance when trained over longer periods of time.
+
+## Reproducibility
+
+Our complete results take hours to obtain, due to the branching factor of MCTS and training scheme of DQN. To reproduce our full results observed in ```mcts.py```, run
+
+```bash
+# Run full agent matchups
+./test.sh
+```
+
+The **DQN1** model was trained using `python3 train_dqn.py`, and the **DQN2** model was trained using `python3 train_dqn_random.py`. All evals in the `/evals` folder were generated using `parse_results.py`.
