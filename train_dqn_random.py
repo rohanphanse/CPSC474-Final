@@ -21,11 +21,11 @@ def train_dqn(
     epsilon_start=1.0,
     epsilon_end=0.05,
     epsilon_decay=0.995,  # Faster decay
-    save_path='dqn_blokus_random.pth',
-    reward_log_path='reward_log_random.csv'
+    save_path='dqn_models/dqn_blokus_dqn2.pth',
+    reward_log_path='dqn_reward_logs/reward_log_dqn2.csv'
 ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print("Using device {}...".format(device))
+    print(f"Using device {device}...")
     env = BlokusEnv(opponent_policy=random_policy)  # Use random opponent
     agent = DQNAgent(
         env.observation_size,
@@ -88,19 +88,6 @@ def train_dqn(
         for i, r in enumerate(reward_history, 1):
             writer.writerow([i, r])
     print(f'Reward log saved to {reward_log_path}')
-
-    # Plot moving average of rewards
-    rewards = np.array(reward_history)
-    window = 100
-    moving_avg = np.convolve(rewards, np.ones(window)/window, mode='valid')
-    plt.figure(figsize=(10,6))
-    plt.plot(rewards, alpha=0.3, label='Episode Reward')
-    plt.plot(np.arange(window-1, len(rewards)), moving_avg, color='red', label=f'{window}-Episode Moving Avg')
-    plt.xlabel('Episode')
-    plt.ylabel('Total Reward')
-    plt.legend()
-    plt.title('DQN Training Reward per Episode (with Moving Average)')
-    plt.show()
 
 if __name__ == '__main__':
     train_dqn() 

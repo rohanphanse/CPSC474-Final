@@ -151,7 +151,7 @@ def mcts_policy(cpu_time_limit, player_2=False, dqn_model_path=None, dqn_weight=
         return best_action, top_actions, total_visits
     return policy
 
-def dqn_policy(model_path='dqn_blokus_random.pth'):
+def dqn_policy(model_path='dqn_models/dqn_blokus_dqn1.pth'):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     from greedy import greedy_policy
     greedy = greedy_policy()
@@ -172,7 +172,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Blokus Duo Evaluation")
     parser.add_argument("--player_1", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #1")
     parser.add_argument("--player_2", choices=["mcts", "greedy", "random", "dqn", "mcts_dqn"], help="Policy for Player #2")
-    parser.add_argument("--dqn_model_path", type=str, default=None, choices=["dqn_blokus_random.pth", "dqn_blokus.pth"], help="Path to DQN model")
+    parser.add_argument("--dqn_model_path", type=str, default=None, choices=["dqn_models/dqn_blokus_dqn1.pth", "dqn_models/dqn_blokus_dqn2.pth"], help="Path to DQN model")
     parser.add_argument("--dqn_weight", type=float, default=0.5, help="DQN weight for MCTS+DQN (0.0 to 1.0)")
     parser.add_argument("--results_path", type=str, help="Path to store evaluation results")
     parser.add_argument("--num_games", type=int, help="Number of games to evaluate")

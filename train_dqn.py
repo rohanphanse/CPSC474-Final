@@ -13,11 +13,11 @@ def train_dqn(
     epsilon_start=1.0,
     epsilon_end=0.05,
     epsilon_decay=0.997,
-    save_path='dqn_blokus.pth',
-    reward_log_path='reward_log.csv'
+    save_path='dqn_models/dqn_blokus_dqn1.pth',
+    reward_log_path='dqn_reward_logs/reward_log_dqn1.csv'
 ):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print("Using device {}...".format(device))
+    print(f"Using device {device}...")
     greedy = greedy_policy()
     env = BlokusEnv(opponent_policy=greedy)
     agent = DQNAgent(

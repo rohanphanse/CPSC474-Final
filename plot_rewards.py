@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import csv
 import pandas as pd
 
-def plot_rewards(csv_path='reward_log.csv', save_path='reward_plot.png'):
+def plot_rewards(csv_path='reward_log.csv', save_path1='reward_plot.png', save_path2='moving_average.png'):
     episodes = []
     rewards = []
     with open(csv_path, 'r') as csvfile:
@@ -24,15 +24,16 @@ def plot_rewards(csv_path='reward_log.csv', save_path='reward_plot.png'):
     plt.show()
     print(f"Plot saved as {save_path}")
     
-    df = pd.read_csv('reward_log.csv')
+    df = pd.read_csv(csv_path)
     df['MovingAvg'] = df['TotalReward'].rolling(window=100).mean()
     plt.plot(df['Episode'], df['TotalReward'], alpha=0.3, label='Episode Reward')
     plt.plot(df['Episode'], df['MovingAvg'], color='red', label='100-Episode Moving Avg')
     plt.xlabel('Episode')
     plt.ylabel('Total Reward')
-    plt.savefig('moving_average.png')
+    plt.savefig(save_path2)
     plt.legend()
     plt.show()
 
 if __name__ == '__main__':
-    plot_rewards()
+    plot_rewards('dqn_reward_logs/reward_log_dqn1.csv', 'dqn_training_plots/reward_plot_dqn1.png', 'dqn_training_plots/moving_average_dqn1.png')
+    plot_rewards('dqn_reward_logs/reward_log_dqn2.csv', 'dqn_training_plots/reward_plot_dqn2.png', 'dqn_training_plots/moving_average_dqn2.png')
