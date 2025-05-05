@@ -37,3 +37,28 @@ We can estimate the state space of Blokus Duo by considering the following thing
 If we assume that each player has an average of 10 playable pieces per turn, which can each be played in 100 different ways on average, we get 1000 actions per turn.
 
 At most, a game can take 42 turns. Assuming an average of 35 turns per game and that actions most often lead to unique states, we get an estimate of $1000^{35} = 10^{105}$ total states for Blokus Duo.
+
+## Agents
+
+We ran simulations with a random agent, a greedy agent, and an MCTS agent. We also trained two different DQN agents, dubbed **DQN1** (trained against a greedy agent) and **DQN2** (trained against a random agent with reward shaping). Finally, we integrated a MCTS+DQN hybrid agent that used the $Q$-values learned from DQN for the MCTS selection criteria.
+
+
+
+## Evaluation Results
+| Matchup | Win Rate (Player 1) |
+|------------------------------------------|---------------------|
+| Greedy vs. Random | 94% (Greedy) |
+| DQN1 vs. Greedy | 13% (DQN1) |
+| DQN1 vs. Random | 62% (DQN1) |
+| DQN2 vs. Greedy | 6% (DQN2) |
+| DQN2 vs. Random | 38% (DQN2) |
+| MCTS (trained with random) vs. Greedy | 59% (MCTS) |
+| MCTS (trained with greedy) vs. Greedy | 78% (MCTS) |
+| MCTS+DQN vs. MCTS | 62% (MCTS+DQN) |
+
+## Observations
+
+- The greedy agent is a very strong baseline, easily defeating random play and both DQN agents.
+- MCTS agents, especially when simulations use the greedy policy, are much stronger than random and competitive with the greedy agent.
+- Combining MCTS with DQN (MCTS+DQN) yields a significant improvement over vanilla MCTS, even if the DQN agents on their own are not as powerful.
+- Due to the large state space and squishing of $Q$-values, the DQN agents took a long time to train and exhibited great stochasticity. In the future, smarter reward shaping, modifications to architecture/hyperparameters, and different training scheme (e.g. with the masking loss function) could aid performance when trained over longer periods of time.
