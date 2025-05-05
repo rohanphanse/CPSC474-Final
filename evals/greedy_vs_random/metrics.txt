@@ -1,0 +1,17 @@
+
+=== Game Statistics ===
+Total Games: 10000
+
+Wins:
+  9341 wins for Player 1
+  540 wins for Player 2
+  119 ties
+
+Win Rates:
+  Player 1: 94.01%
+  Player 2: 6.00%
+
+Score Statistics:
+  Average Score Margin: 19.75 ± 14.42
+  Player 1 Average Score: 19.76 ± 5.38
+  Player 2 Average Score: 39.51 ± 11.73
