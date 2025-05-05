@@ -220,9 +220,11 @@ def run_demo(player_1, player_2, dqn_model_path=None, dqn_weight=0.5):
                 action, top_actions, total_visits = mcts_player_2(state)
         elif player_policy == "greedy":
             action, top_actions = greedy_player(state)
+            time.sleep(1)
         elif player_policy == "random":
             actions = state.get_actions()
             action = actions if actions == "Pass" else random.choice(actions)
+            time.sleep(1)
         elif player_policy == "dqn":
             if player == 0:
                 action, top_actions = dqn_player_1(state)
@@ -237,6 +239,8 @@ def run_demo(player_1, player_2, dqn_model_path=None, dqn_weight=0.5):
                 for i, top_action in enumerate(top_actions):
                     prefix = f"\033[1;97;4{4 if player == 0 else 1}m" if i == 0 else ""
                     print(f"  {prefix}{i + 1}.", top_action[0], " - avg. reward:", round(top_action[1]["value"] / (top_action[1]["visits"] + 1e-6), 5), "and visits:", top_action[1]["visits"], "\033[0m")
+                for i in range(len(top_actions), 10):
+                    print(f"  {i + 1}. -")
             elif player_policy == "greedy":
                 print(f"Top actions:")
                 for i, top_action in enumerate(top_actions):
@@ -245,9 +249,16 @@ def run_demo(player_1, player_2, dqn_model_path=None, dqn_weight=0.5):
                         print(f"  {prefix}{i + 1}.", top_action[1], "\033[0m")
                     else:
                         print(f"  {prefix}{i + 1}.", top_action[1], "- score:", top_action[0], "\033[0m")
+                for i in range(len(top_actions), 10):
+                    print(f"  {i + 1}. -")
             elif player_policy == "random":
                 print(f"Top actions (turn: {turn}):")
-                print(f"  \033[1;97;4{4 if player == 0 else 1}m1. {action}\033[0m")
+                for i in range(10):
+                    if i == 0:
+                        print(f"  \033[1;97;4{4 if player == 0 else 1}m{i + 1}. {action}\033[0m")
+                    else:
+                        print(f"  {i + 1}. -")
+
             print()
         turn += 1
     print("Game over! Final results:")
@@ -259,6 +270,7 @@ def run_demo(player_1, player_2, dqn_model_path=None, dqn_weight=0.5):
 
 if __name__ == "__main__":
     print("Demo for Blokus Duo Agents!")
-    print("Two matchups will be shown: MCTS vs. Greedy and MCTS + DQN vs. MCTS")
+    print("Three matchups will be shown: Greedy vs. Random, MCTS vs. Greedy and MCTS + DQN vs. MCTS")
+    run_demo("greedy", "random")
     run_demo("mcts", "greedy")
     run_demo("mcts_dqn", "mcts")
